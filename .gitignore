@@ -30,3 +30,7 @@
 *.exe
 *.out
 *.app
+
+/facebook/
+/prova/
+/soc-Live/
