@@ -10,15 +10,20 @@ class TriangularMatrix{
 
         vector<vector<bool>> matrix;
     public:
-        TriangularMatrix(size_t size); //empty triangular matrix
+        TriangularMatrix();
+        void Init(size_t size); //empty triangular matrix
         void print_row(int i);
         void pretty_print();
         void insert_modify(size_t i, size_t j, bool val);
+        bool check(size_t i, size_t j);
+        size_t get_size();
 
 };
 
-TriangularMatrix::TriangularMatrix(size_t size){
+TriangularMatrix::TriangularMatrix(){}
 
+void TriangularMatrix::Init(size_t size){
+    
     this->size=size-1;
 
     for (size_t i = 0; i < this->size; i++){
@@ -60,8 +65,31 @@ void TriangularMatrix::pretty_print(){
 
 void TriangularMatrix::insert_modify(size_t i, size_t j, bool val=1){
 
-    if (i<j)
-        this->matrix.at(i).at(j-i-1)=val;
-    else
-        this->matrix.at(j).at(i-j-1)=val;
+    if (i!=j){
+
+        if (i<j)
+            this->matrix.at(i).at(j-i-1)=val;
+        else
+            this->matrix.at(j).at(i-j-1)=val;
+    }
+    else{
+        cerr<<"i and j are equal"<<endl;
+    }
+}
+
+bool TriangularMatrix::check(size_t i, size_t j){
+
+    if (i!=j){
+        if (i<j)
+            return this->matrix.at(i).at(j-i-1);
+        else
+            return this->matrix.at(j).at(i-j-1);
+    }else{
+        cerr<<"i and j are equal";
+        return false;
+    }
+}
+
+size_t TriangularMatrix::get_size(){
+    return size;
 }

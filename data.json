@@ -1,0 +1,5 @@
+{
+    "facebook": ["http://snap.stanford.edu/data/facebook_combined.txt.gz", 4039,1612010] , 
+    "astro_physics": ["http://snap.stanford.edu/data/ca-AstroPh.txt.gz", 18772,1351441],
+    "soc-Live":["http://snap.stanford.edu/data/soc-LiveJournal1.txt.gz",4847571,285730264]
+}
