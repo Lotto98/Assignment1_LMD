@@ -6,21 +6,31 @@
 #include <chrono>
 #include <future>
 #include <thread>
+
 #include "TriangularMatrix.cpp"
+#include "NodeLists.cpp"
 
 using namespace std;
 
 class UndirectedGraph
 {
 private:
-    TriangularMatrix graph;
     int n_nodes;
     int n_edges;
+
     int true_n_triangles;
+
+    bool is_dense;
+
+    //dense graph structure
+    TriangularMatrix dense_graph;
+
+    //sparse graph structure
+    NodeLists sparse_graph;
 
     vector<pair<int,int>> edges;
 
-    int static _count_triangles(UndirectedGraph *graph,size_t id=0, size_t skip=1);
+    int static _count_triangles(UndirectedGraph *dense_graph,size_t id=0, size_t skip=1);
 public:
     UndirectedGraph(string filename);
     
@@ -44,9 +54,6 @@ UndirectedGraph::UndirectedGraph(string dirname){
 
     nodes_file.close();
     
-    //cout<<n_nodes;
-    this->graph.Init(n_nodes); //matrix init
-    
     // read edges
 
     ifstream edges_file(dirname + "/edges.txt");
@@ -63,17 +70,6 @@ UndirectedGraph::UndirectedGraph(string dirname){
         string b;
         ss>> b;
 
-        try
-        {
-            graph.insert_modify(stoi(a),stoi(b));
-        }
-        catch(const std::exception& e)
-        {
-            cout<<a<<' '<<b<<' '<<graph.get_size()<<endl;
-            
-            break;
-        }
-
         edges.push_back(pair<int,int>(stoi(a),stoi(b)));
 
         this->n_edges++;
@@ -89,6 +85,24 @@ UndirectedGraph::UndirectedGraph(string dirname){
     true_n_triangles=stoi(line);
 
     triangles_file.close();
+
+    double density=double(2*n_edges)/double(n_nodes*(n_nodes-1));
+
+    if(density>0.5){
+        is_dense=true;
+        dense_graph.Init(n_nodes);
+        for(auto p:edges){
+            dense_graph.insert_modify(p.first,p.second);
+        }
+    }
+    else{
+        is_dense=false;
+        sparse_graph.Init(n_nodes);
+        for(auto p:edges){
+            sparse_graph.insert(p.first,p.second);
+            sparse_graph.insert(p.second,p.first);
+        }
+    }
 }
 
 void UndirectedGraph::print_edges(){
@@ -98,7 +112,10 @@ void UndirectedGraph::print_edges(){
 }
 
 void UndirectedGraph::print_graph(){
-    this->graph.pretty_print();
+    if (is_dense)
+        this->dense_graph.pretty_print();
+    else
+        this->sparse_graph.print();
 }
 
 void UndirectedGraph::print_variables(){
@@ -119,14 +136,14 @@ int UndirectedGraph::_count_triangles(UndirectedGraph *g, size_t id, size_t skip
         auto edge=g->edges[j];
 
         //cout<<edge.first<<' '<<edge.second<<endl;
-        for (size_t i = 0; i <= g->graph.get_size(); i++){
+        for (size_t i = 0; i <= g->dense_graph.get_size(); i++){
 
             //cout<<edge.first<<' '<<i<<endl;
             //cout<<edge.second<<' '<<i<<endl<<endl;
 
             if (edge.first!=i && edge.second!=i && 
-                    g->graph.check(edge.first,i) && 
-                    g->graph.check(edge.second,i) ){
+                    g->dense_graph.check(edge.first,i) && 
+                    g->dense_graph.check(edge.second,i) ){
 
                 n_triangles++;
             }
@@ -161,6 +178,8 @@ int main(int argc, char const *argv[])
 {
     UndirectedGraph ug("facebook");
 
+    ug.print_graph();
+    /*
     auto start=chrono::high_resolution_clock::now();
     int t=ug.count_triangles();
     auto stop=chrono::high_resolution_clock::now();
@@ -185,7 +204,7 @@ int main(int argc, char const *argv[])
     cout <<"Elapsed: "<< elapsed.count() <<"ms or "<<double(elapsed.count())/1000.0<<"s"<<endl;
 
     ug.print_variables();
-
+    */
     return 0;
 }
 
