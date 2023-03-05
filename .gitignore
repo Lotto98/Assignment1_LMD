@@ -31,8 +31,8 @@
 *.out
 *.app
 
-/facebook/
-/prova/
-/soc-Live/
+/data/facebook/
+/data/prova/
+/data/soc-Live/
 
 UndirectedGraph
