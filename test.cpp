@@ -93,7 +93,7 @@ void test_sparse(string filename){
 
 int main(int argc, char const *argv[])
 {
-    //test_sparse("facebook");
-    test_dense("facebook");
+    test_sparse("facebook");
+    //test_dense("facebook");
     return 0;
 }
