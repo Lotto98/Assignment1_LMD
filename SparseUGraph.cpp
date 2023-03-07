@@ -3,11 +3,13 @@
 
 SparseUGraph::SparseUGraph(string filename): UndirectedGraph(filename){
 
+    auto start=chrono::high_resolution_clock::now();
+
     for (size_t i = 0; i < n_nodes; i++){
         
         vector<size_t> row;
 
-        v.push_back(row);
+        v.push_back(make_pair(row,false));
     }
 
     for(auto edge:edges){
@@ -15,18 +17,19 @@ SparseUGraph::SparseUGraph(string filename): UndirectedGraph(filename){
         size_t i=edge.first;
         size_t j=edge.second;
 
-        v.at(i).push_back(j);
-        v.at(j).push_back(i);
+        v.at(i).first.push_back(j);
+        v.at(j).first.push_back(i);
     }
+    
+    auto stop=chrono::high_resolution_clock::now();
+    auto elapsed=chrono::duration_cast<chrono::milliseconds>(stop-start);
 
-    for(auto e:v){
-        sort(e.begin(),e.end());
-    }
+    construction_time=elapsed.count();
 }
 
 void SparseUGraph::print_row(size_t row){
     
-    for (auto j: v.at(row)){
+    for (auto j: v.at(row).first){
         cout << j << ' ';
     } 
     
@@ -40,7 +43,7 @@ void SparseUGraph::print_graph(bool to_file){
 
             cout<<"["<<i<<"]: ";
 
-            for (auto j: v.at(i)){
+            for (auto j: v.at(i).first){
                 cout << j << ' ';
             }
 
@@ -56,7 +59,7 @@ void SparseUGraph::print_graph(bool to_file){
 
             file<<"["<<i<<"]: ";
 
-            for (auto j: v.at(i)){
+            for (auto j: v.at(i).first){
                 file << j << ' ';
             }
 
@@ -67,17 +70,8 @@ void SparseUGraph::print_graph(bool to_file){
     }
 }
 
-
-bool SparseUGraph::check(size_t a, size_t b){
-
-
-    if(a==b || a<0 || b<0 || a>n_nodes || a>n_nodes){
-        cerr<<"invalid indexes: "<<a<<","<<b<<endl;
-        return false;
-    }
-
-    return find(v.at(b).begin(), v.at(b).end(), a) != v.at(b).end() && 
-        find(v.at(a).begin(), v.at(a).end(), b) != v.at(a).end();
+size_t SparseUGraph::get_construction_time(){
+    return construction_time;
 }
 
 size_t SparseUGraph::_count_triangles(SparseUGraph *g, size_t id, size_t skip){
@@ -92,10 +86,23 @@ size_t SparseUGraph::_count_triangles(SparseUGraph *g, size_t id, size_t skip){
         size_t b=edge.second;
 
         vector<size_t> c;
-        set_intersection(g->v.at(a).begin(),g->v.at(a).end(),g->v.at(b).begin(),g->v.at(b).end(),back_inserter(c));
+
+        vector<size_t> a_vec=g->v.at(a).first;
+        vector<size_t> b_vec=g->v.at(b).first;
+
+        if(!g->v.at(a).second){
+            sort(a_vec.begin(),a_vec.end());
+            g->v.at(a).second=true;
+        }
+
+        if(!g->v.at(b).second){
+            sort(b_vec.begin(),b_vec.end());
+            g->v.at(b).second=true;
+        }
+
+        set_intersection(a_vec.begin(),a_vec.end(),b_vec.begin(),b_vec.end(),back_inserter(c));
 
         n_triangles+=c.size();
-
     }
     
     return n_triangles;

@@ -35,14 +35,6 @@ UndirectedGraph::UndirectedGraph(string dirname){
 
     edges_file.close();
 
-    //read n triangles
-    ifstream triangles_file("data/"+dirname+"/triangle.txt");
-    getline(triangles_file, line);
-
-    istringstream ss_triangles(line);
-    ss_triangles>>true_n_triangles;
-
-    triangles_file.close();
 }
 
 void UndirectedGraph::print_edges(){
@@ -55,7 +47,6 @@ void UndirectedGraph::print_variables(){
     
     cout<<"N° of edges "<<this->n_edges<<endl;
     cout<<"N° of nodes "<<this->n_nodes<<endl;
-    cout<<"N° of triangles "<<this->true_n_triangles<<endl;
 
     cout<<"Density: "<<double(2*n_edges)/double(n_nodes*(n_nodes-1))<<endl<<endl;
 }

@@ -10,10 +10,8 @@ using namespace std;
 class UndirectedGraph
 {
 protected:
-    size_t n_nodes;
-    size_t n_edges;
-
-    size_t true_n_triangles;
+    size_t n_nodes=0;
+    size_t n_edges=0;
 
     //read edges from file
     vector<pair<size_t,size_t>> edges;

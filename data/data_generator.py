@@ -18,15 +18,10 @@ def main():
         print("n_edges should be <="+str(comb(int(n_nodes),2)))
         return
     
-    print("generating full graph...")
-    
+    print("generating mask...")
     pairs=itertools.combinations(range(int(n_nodes)),2)
-    
-    l=np.array([str(pair[0])+" "+str(pair[1])+"\n" for pair in pairs])
-    
-    print("removing edges...")
-    indexes=np.random.randint(0, comb(int(n_nodes),2), comb(int(n_nodes),2)-int(n_edges) )
-    l=np.delete(l,indexes)
+    mask=np.append(np.repeat(1,int(n_edges)),np.zeros(comb(int(n_nodes),2)-int(n_edges),np.int8))
+    np.random.shuffle(mask)
     
     PATH = os.getcwd()+"/"+graph_name
     
@@ -35,7 +30,9 @@ def main():
 
     print("generating files...")
     with open(graph_name+"/edges.txt", "w") as edges:
-        edges.writelines(l)
+        for n,pair in enumerate(pairs):
+            if mask[n]: 
+                edges.write(str(pair[0])+" "+str(pair[1])+"\n")
         
     with open(graph_name+"/nodes.txt", "w") as nodes:
         nodes.write(n_nodes)
