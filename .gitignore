@@ -31,8 +31,9 @@
 *.out
 *.app
 
-/data/facebook/
-/data/prova/
-/data/soc-Live/
+/data/*
+!data_generator.py
+!download_data.py
+
 
 UndirectedGraph

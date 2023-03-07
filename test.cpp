@@ -15,10 +15,6 @@ void test_dense(string filename){
     DenseUGraph dg(filename);
     dg.print_variables();
 
-    //dg.print_graph(true);
-
-    //dg.print_variables();
-
     cout<<"*** Single core ***"<<endl<<endl;
 
     tie(triangles,elapsed_single)=dg.count_triangles();
@@ -56,10 +52,6 @@ void test_sparse(string filename){
     SparseUGraph dg(filename);
     dg.print_variables();
 
-    //dg.print_graph(true);
-
-    //dg.print_variables();
-
     cout<<"*** Single core ***"<<endl<<endl;
 
     tie(triangles,elapsed_single)=dg.count_triangles();
@@ -93,7 +85,7 @@ void test_sparse(string filename){
 
 int main(int argc, char const *argv[])
 {
-    test_sparse("facebook");
-    //test_dense("facebook");
+    test_sparse("4039_dense_graph");
+    //test_dense("4039_dense_graph");
     return 0;
 }
