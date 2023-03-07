@@ -79,11 +79,11 @@ void DenseUGraph::print_graph(bool to_file){
 
 bool inline DenseUGraph::check(size_t a, size_t b){
 
-
+    /*
     if(a==b || a<0 || b<0 || a>size || b>size){
         cerr<<"invalid indexes: "<<a<<","<<b<<endl;
         return false;
-    }
+    }*/
 
     bool to_return;
 

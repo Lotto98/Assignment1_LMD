@@ -34,6 +34,3 @@
 /data/*
 !data_generator.py
 !download_data.py
-
-
-UndirectedGraph
