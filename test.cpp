@@ -75,7 +75,7 @@ void test_sparse(string filename){
 
     cout<<"*** Multi core ***"<<endl<<endl;
 
-    for (unsigned int i = 2; i <= thread::hardware_concurrency(); i++){
+    for (unsigned int i = 2; i <= 20; i++){
         
         cout <<"N° threads: "<<i<<endl;
 
@@ -98,7 +98,7 @@ void test_sparse(string filename){
 
 int main(int argc, char const *argv[])
 {
-    test_sparse("25010_sparse_graph");
+    test_sparse("facebook");
     //test_dense("4039_dense_graph");
     return 0;
 }

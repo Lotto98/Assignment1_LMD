@@ -14,13 +14,15 @@ def main():
     
     _,graph_name,n_nodes, n_edges=argv
     
-    if int(n_edges)>comb(int(n_nodes),2):
-        print("n_edges should be <="+str(comb(int(n_nodes),2)))
+    cb=comb(int(n_nodes),2)
+    
+    if int(n_edges)>cb:
+        print("n_edges should be <="+str(cb))
         return
     
     print("generating mask...")
     pairs=itertools.combinations(range(int(n_nodes)),2)
-    mask=np.append(np.repeat(1,int(n_edges)),np.zeros(comb(int(n_nodes),2)-int(n_edges),np.int8))
+    mask=np.append(np.repeat(1,int(n_edges)),np.zeros(cb-int(n_edges),np.int8))
     np.random.shuffle(mask)
     
     PATH = os.getcwd()+"/"+graph_name

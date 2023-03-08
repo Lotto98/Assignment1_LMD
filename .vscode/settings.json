@@ -56,5 +56,5 @@
         "streambuf": "cpp",
         "thread": "cpp"
     },
-    "python.analysis.typeCheckingMode": "basic"
+    "python.analysis.typeCheckingMode": "off"
 }
