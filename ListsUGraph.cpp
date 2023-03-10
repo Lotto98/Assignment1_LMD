@@ -4,7 +4,7 @@
 #include <future>
 #include <algorithm>
 
-ListsUGraph::ListsUGraph(std::string dirname):UndirectedGraph(dirname){
+void ListsUGraph::_create_list(){
 
     auto start=std::chrono::high_resolution_clock::now();
 
@@ -28,6 +28,14 @@ ListsUGraph::ListsUGraph(std::string dirname):UndirectedGraph(dirname){
     auto elapsed=std::chrono::duration_cast<std::chrono::milliseconds>(stop-start);
 
     construction_time=elapsed.count();
+}
+
+ListsUGraph::ListsUGraph(std::string dirname):UndirectedGraph(dirname){
+    _create_list();
+}
+
+ListsUGraph::ListsUGraph(UndirectedGraph ug) :UndirectedGraph(ug){
+    _create_list();
 }
 
 void ListsUGraph::print_row(size_t row){

@@ -54,7 +54,9 @@
         "stdexcept": "cpp",
         "stop_token": "cpp",
         "streambuf": "cpp",
-        "thread": "cpp"
+        "thread": "cpp",
+        "list": "cpp",
+        "set": "cpp"
     },
     "python.analysis.typeCheckingMode": "off"
 }

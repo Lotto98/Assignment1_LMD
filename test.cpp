@@ -1,13 +1,10 @@
-#include <chrono>
-#include <iostream>
+//#include "DenseUGraph.h"
+#include "ListsUGraph.h"
 #include <tuple>
-#include <thread>
-
-#include "DenseUGraph.h"
-#include "SparseUGraph.h"
 
 using namespace std;
 
+/*
 void test_dense(string filename){
 
     size_t triangles,elapsed_single,elapsed;
@@ -43,21 +40,19 @@ void test_dense(string filename){
 
         cout<<endl;
     }
-}
+}*/
 
-void test_sparse(string filename){
+void test_lists(string filename){
 
-    {
-    ListsUGraph dg(filename);
-    dg.print_variables();
-    }
+    UndirectedGraph ug(filename);
+    ug.print_variables();
 
     size_t triangles,elapsed,construction;
     
     {
     cout<<"*** Single core ***"<<endl<<endl;
 
-    ListsUGraph dg(filename);
+    ListsUGraph dg(ug);
 
     construction=dg.get_construction_time();
 
@@ -79,7 +74,7 @@ void test_sparse(string filename){
         
         cout <<"N° threads: "<<i<<endl;
 
-        ListsUGraph dg(filename);
+        ListsUGraph dg(ug);
 
         construction=dg.get_construction_time();
 
@@ -98,7 +93,7 @@ void test_sparse(string filename){
 
 int main(int argc, char const *argv[])
 {
-    test_sparse("facebook");
+    test_lists("4039_dense_graph");
     //test_dense("4039_dense_graph");
     return 0;
 }

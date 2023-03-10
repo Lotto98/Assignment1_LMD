@@ -14,6 +14,10 @@ protected:
     std::vector<std::pair<size_t,size_t>> edges;
 
 public:
+    //create undirectedGraph from another undirectedGraph (reference copy)
+    UndirectedGraph(UndirectedGraph& u);
+    
+    //load undirected graph from file
     UndirectedGraph(std::string filename);
     
     //print edges
@@ -21,6 +25,7 @@ public:
 
     //print graph variables and stats
     void print_variables();
+
 };
 
 #endif

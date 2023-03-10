@@ -13,8 +13,8 @@ private:
     //time spent constructing List of adjusted nodes
     size_t construction_time;
 
-    //load edges data structure from file
-    void _load_edges(std::string dirname);
+    //creates lists data structure (called by constructor)
+    void _create_list();
 
     //given a ListsUGraph object, count the number of triangles the graph,
     //other two parameters are for multithread execution
@@ -22,6 +22,8 @@ private:
 
 public:
     ListsUGraph(std::string dirname);
+
+    ListsUGraph(UndirectedGraph ug);
 
     //print 'lists' data structure
     void print_graph(bool to_file=false);

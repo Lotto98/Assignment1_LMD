@@ -3,6 +3,16 @@
 
 #include "UndirectedGraph.h"
 
+UndirectedGraph::UndirectedGraph(UndirectedGraph& g){
+
+    //ref copy
+    this->edges=g.edges;
+
+    //copy
+    this->n_edges=g.edges.size();
+    this->n_nodes=g.n_nodes;
+}
+
 UndirectedGraph::UndirectedGraph(std::string dirname){
 
     std::string line; //buffer
