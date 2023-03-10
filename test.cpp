@@ -48,7 +48,7 @@ void test_dense(string filename){
 void test_sparse(string filename){
 
     {
-    SparseUGraph dg(filename);
+    ListsUGraph dg(filename);
     dg.print_variables();
     }
 
@@ -57,7 +57,7 @@ void test_sparse(string filename){
     {
     cout<<"*** Single core ***"<<endl<<endl;
 
-    SparseUGraph dg(filename);
+    ListsUGraph dg(filename);
 
     construction=dg.get_construction_time();
 
@@ -79,7 +79,7 @@ void test_sparse(string filename){
         
         cout <<"N° threads: "<<i<<endl;
 
-        SparseUGraph dg(filename);
+        ListsUGraph dg(filename);
 
         construction=dg.get_construction_time();
 
