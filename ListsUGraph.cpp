@@ -12,7 +12,7 @@ void ListsUGraph::_create_list(){
         
         std::vector<size_t> row;
 
-        lists.push_back(make_pair(row,false));
+        lists.push_back(std::pair<std::vector<size_t>,bool>(row,false));
     }
 
     for(auto edge:edges){
@@ -98,12 +98,21 @@ size_t ListsUGraph::_count_triangles(ListsUGraph *g, size_t id, size_t skip){
 
         std::vector<size_t> c;
 
+
         std::vector<size_t> a_vec=g->lists.at(a).first;
         std::vector<size_t> b_vec=g->lists.at(b).first;
 
         if(!g->lists.at(a).second){
             sort(a_vec.begin(),a_vec.end());
             g->lists.at(a).second=true;
+
+            for (size_t i = 0; i < a_vec.size(); i++)
+            {
+                if(a_vec[i]!=g->lists.at(a).first[i]){
+                    std::cout<<"ops";
+                }
+            }
+            
         }
 
         if(!g->lists.at(b).second){
