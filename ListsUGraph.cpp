@@ -3,7 +3,6 @@
 #include <fstream>
 #include <future>
 #include <algorithm>
-#include <cstdlib>
 
 void ListsUGraph::_create_list(){
     auto start=std::chrono::high_resolution_clock::now();
@@ -117,12 +116,12 @@ std::pair<unsigned long long,unsigned long long> ListsUGraph::count_triangles(){
 
     _sort(this);
 
-    size_t n_triangles=_count_triangles(this)/3;
+    unsigned long long n_triangles=_count_triangles(this)/3;
 
     auto stop=std::chrono::high_resolution_clock::now();
     auto elapsed=std::chrono::duration_cast<std::chrono::milliseconds>(stop-start);
 
-    return std::pair<size_t,size_t>(n_triangles,elapsed.count());
+    return std::pair<unsigned long long,unsigned long long>(n_triangles,elapsed.count());
 }
 
 
