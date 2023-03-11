@@ -7,15 +7,13 @@
 class UndirectedGraph
 {
 protected:
-    std::size_t n_nodes=0;
+    size_t n_nodes=0;
     size_t n_edges=0;
 
     //read edges from file
     std::vector<std::pair<size_t,size_t>> edges;
 
 public:
-    //create undirectedGraph from another undirectedGraph (reference copy)
-    UndirectedGraph(UndirectedGraph& u);
     
     //load undirected graph from file
     UndirectedGraph(std::string filename);

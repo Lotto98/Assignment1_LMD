@@ -47,7 +47,7 @@ void test_lists(string filename){
     UndirectedGraph ug(filename);
     ug.print_variables();
 
-    size_t triangles,elapsed,construction;
+    unsigned long long triangles,elapsed,construction;
     
     {
     cout<<"*** Single core ***"<<endl<<endl;
