@@ -6,13 +6,17 @@
 class MatrixUGraph: public UndirectedGraph
 {
 private:
-    std::vector<std::vector<bool>> matrix; //graph
+    std::vector<std::vector<size_t>> matrix; //graph
 
     unsigned long long construction_time;
 
     void _create_matrix();
 
-    static void _count_triangles(MatrixUGraph *g, std::vector<std::vector<int>> mult3,size_t id=0, size_t skip=1);    
+    static void _matrix_molt(std::vector<std::vector<size_t>> &a,
+                                    std::vector<std::vector<size_t>> &b,
+                                    std::vector<std::vector<size_t>> &mult,
+                                    size_t n_nodes,
+                                    size_t id=0, size_t skip=1);    
 public:
     MatrixUGraph(std::string filename);
     MatrixUGraph(UndirectedGraph ug);

@@ -10,7 +10,7 @@ void MatrixUGraph::_create_matrix(){
 
     for (size_t i = 0; i < n_nodes; i++){
         
-        std::vector<bool> row;
+        std::vector<size_t> row;
         row.insert(row.begin(),n_nodes,0);
 
         matrix.push_back(row);
@@ -81,30 +81,30 @@ unsigned long long MatrixUGraph::get_construction_time(){
     return construction_time;
 }
 
-void MatrixUGraph::_count_triangles(MatrixUGraph *g, std::vector<std::vector<int>> mult3,size_t id, size_t skip){
+void inline MatrixUGraph::_matrix_molt(std::vector<std::vector<size_t>> &a,
+                                    std::vector<std::vector<size_t>> &b,
+                                    std::vector<std::vector<size_t>> &mult,
+                                    size_t n_nodes,
+                                    size_t id, size_t skip){
 
-    std::vector<std::vector<int>> mult2(g->n_nodes, std::vector<int> (g->n_nodes, 0));
-
-    for(size_t i = id; i < g->n_nodes; i+=skip)
-        for(size_t j = 0; j < g->n_nodes; ++j)
-            for(size_t k = 0; k < g->n_nodes; ++k){
-                mult2[i][j] += g->matrix[i][k] && g->matrix[k][j];
+    for(size_t i = id; i < n_nodes; i+=skip)
+        for(size_t j = 0; j < n_nodes; ++j)
+            for(size_t k = 0; k < n_nodes; ++k){
+                mult[i][j] += a[i][k] * b[k][j];
             }
     
-    for(size_t i = id; i < g->n_nodes; i+=skip)
-        for(size_t j = 0; j < g->n_nodes; ++j)
-            for(size_t k = 0; k < g->n_nodes; ++k){
-                mult3[i][j] += g->matrix[i][k] * mult2[k][j];
-            }
 }
 
 std::pair<unsigned long long,unsigned long long> MatrixUGraph::count_triangles(){
     
     auto start=std::chrono::high_resolution_clock::now();
 
-    std::vector<std::vector<int>> mult3(n_nodes, std::vector<int> (n_nodes, 0));
 
-    _count_triangles(this,mult3);
+    std::vector<std::vector<size_t>> mult2(n_nodes, std::vector<size_t> (n_nodes, 0));
+    std::vector<std::vector<size_t>> mult3(n_nodes, std::vector<size_t> (n_nodes, 0));
+
+    _matrix_molt(this->matrix,this->matrix,mult2,n_nodes);
+    _matrix_molt(this->matrix,mult2,mult3,n_nodes);
 
     unsigned long long n_triangles=0;
 
@@ -118,6 +118,7 @@ std::pair<unsigned long long,unsigned long long> MatrixUGraph::count_triangles()
     return std::pair<unsigned long long,unsigned long long>(n_triangles/6,elapsed.count());
 }
 
+
 std::pair<unsigned long long,unsigned long long> MatrixUGraph::count_triangles_multi(size_t n_threads){
 
     auto start=std::chrono::high_resolution_clock::now();
@@ -127,7 +128,7 @@ std::pair<unsigned long long,unsigned long long> MatrixUGraph::count_triangles_m
     std::thread threads[n_threads];
     
     for (size_t i = 0; i < n_threads; i++){
-        threads[i]=std::thread(_count_triangles,this,mult3,i,n_threads);
+        //threads[i]=std::thread(_count_triangles,this,mult3,i,n_threads);
     }
 
     unsigned long long n_triangles=0;
