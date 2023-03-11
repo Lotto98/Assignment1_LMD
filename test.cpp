@@ -1,15 +1,32 @@
-#include "MatrixUGraph.h"
+//#include "MatrixUGraph.h"
 #include "ListsUGraph.h"
 #include <tuple>
+#include <fstream>
 
 using namespace std;
 
-void test_lists(string filename){
+#define N_THREADS 20
 
-    UndirectedGraph ug(filename);
+void to_txt(unsigned long long exec_times[N_THREADS],string graph_name){
+    ofstream file("results/"+graph_name+".txt");
+    
+    for (size_t i = 0; i < N_THREADS; i++){
+        
+        file << exec_times[i] << ' ';
+    }
+    
+}
+
+void test_lists(string graph_name){
+
+    cout<<graph_name<<endl;
+
+    UndirectedGraph ug(graph_name);
     ug.print_variables();
 
     unsigned long long triangles,elapsed,construction;
+
+    unsigned long long exec_times[N_THREADS];
     
     {
     cout<<"*** Single core ***"<<endl<<endl;
@@ -28,11 +45,13 @@ void test_lists(string filename){
     cout <<"Total elapsed time: "<< elapsed+construction <<"ms or "<<double(elapsed+construction)/1000.0<<"s"<<endl;
 
     cout<<endl;
+
+    exec_times[0]=elapsed+construction;
     }
 
     cout<<"*** Multi core ***"<<endl<<endl;
 
-    for (unsigned int i = 2; i <= 20; i++){
+    for (unsigned int i = 2; i <= N_THREADS; i++){
         
         cout <<"N° threads: "<<i<<endl;
 
@@ -50,12 +69,16 @@ void test_lists(string filename){
         cout <<"Total elapsed time: "<< elapsed+construction <<"ms or "<<double(elapsed+construction)/1000.0<<"s"<<endl;
 
         cout<<endl;
+
+        exec_times[i-1]=elapsed+construction;
     }
+
+    to_txt(exec_times,graph_name);
 }
 
-void test_matrix(string filename){
+/*void test_matrix(string graph_name){
 
-    UndirectedGraph ug(filename);
+    UndirectedGraph ug(graph_name);
     ug.print_variables();
 
     unsigned long long triangles,elapsed,construction;
@@ -100,11 +123,16 @@ void test_matrix(string filename){
 
         cout<<endl;
     }
-}
+}*/
 
 int main(int argc, char const *argv[])
 {
-    //test_lists("4039_dense_graph");
-    test_matrix("facebook");
+    string graph_names[]={"4039_dense_graph","45100_sparse_graph","facebook"};
+
+    for (size_t i = 0; i < 3; i++){
+        test_lists(graph_names[i]);
+    }
+    
+    //test_matrix("4039_dense_graph");
     return 0;
 }
