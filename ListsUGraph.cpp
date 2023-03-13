@@ -1,103 +1,106 @@
 #include "ListsUGraph.h"
 
+#include <iostream>
 #include <fstream>
+#include <sstream>
 #include <future>
+#include <thread>
 #include <algorithm>
 
-void ListsUGraph::_create_list(){
-    auto start=std::chrono::high_resolution_clock::now();
+ListsUGraph::ListsUGraph(std::string dirname){
 
-    for (size_t i = 0; i < n_nodes; i++){
+    std::string line; //buffer
+
+    //read n nodes
+    std::ifstream nodes_file("data/"+dirname+"/nodes.txt");
+    getline(nodes_file, line);
+
+    std::istringstream ss_nodes(line);
+    ss_nodes>>n_nodes;
+
+    nodes_file.close();
+    
+    //read edges
+    std::ifstream edges_file("data/"+dirname + "/edges.txt");
+
+    this->n_edges=0;
+
+    while( getline (edges_file, line) ){
         
-        std::vector<unsigned long long> row;
+        std::istringstream ss_edges(line);
+        
+        size_t a,b;
+        ss_edges>> a;
+        ss_edges>> b;
 
-        lists.push_back(row);
+        edges.push_back(std::pair<size_t,size_t>(a,b));
+
+        this->n_edges++;
+
     }
 
-    for(auto edge:edges){
-        
-        size_t i=edge.first;
-        size_t j=edge.second;
-
-        lists.at(i).push_back(j);
-        lists.at(j).push_back(i);
-    }
-    
-    auto stop=std::chrono::high_resolution_clock::now();
-    auto elapsed=std::chrono::duration_cast<std::chrono::milliseconds>(stop-start);
-
-    construction_time=elapsed.count();
+    edges_file.close();
 }
 
-ListsUGraph::ListsUGraph(std::string dirname):UndirectedGraph(dirname){
-    _create_list();
-}
-
-ListsUGraph::ListsUGraph(UndirectedGraph ug):UndirectedGraph(ug){
-    _create_list();
-}
-
-void ListsUGraph::print_row(size_t row){
-    
-    for (auto j: lists.at(row)){
-        std::cout << j << ' ';
+void ListsUGraph::print_edges(){
+    for (auto j: edges){
+        std::cout << j.first <<' '<< j.second << std::endl;
     } 
-    
 }
 
-void ListsUGraph::print_graph(bool to_file){
+void ListsUGraph::print_variables(){
     
-    if(!to_file){
+    std::cout<<"N° of edges "<<this->n_edges<<std::endl;
+    std::cout<<"N° of nodes "<<this->n_nodes<<std::endl;
 
-        for (size_t i = 0; i < n_nodes; i++){
+    std::cout<<"Density: "<<double(2*n_edges)/double(n_nodes*(n_nodes-1))<<std::endl<<std::endl;
+}
 
-            std::cout<<"["<<i<<"]: ";
+void ListsUGraph::_populate_lists(std::vector<std::vector<size_t>> &lists,
+                                    std::vector<std::pair<size_t,size_t>> &edges,
+                                    std::vector<std::mutex> &mutexes,
+                                    size_t id, size_t skip){
+    
 
-            for (auto j: lists.at(i)){
-                std::cout << j << ' ';
-            }
-
-            std::cout<<std::endl;
-        }
-
-        std::cout << std::endl;
-    }
-    else{
-        std::ofstream file("graph_print.txt");
-
-        for (size_t i = 0; i < n_nodes; i++){
-
-            file<<"["<<i<<"]: ";
-
-            for (auto j: lists.at(i)){
-                file << j << ' ';
-            }
-
-            file<<std::endl;
-        }
+    for (size_t k = id; k < edges.size(); k+=skip){
         
-        file << std::endl;
+        size_t i=edges.at(k).first;
+        size_t j=edges.at(k).second;
+
+        if(!mutexes.empty()) mutexes[i].lock();
+        lists.at(i).push_back(j);
+        if(!mutexes.empty()) mutexes[i].unlock();
+
+        if(!mutexes.empty()) mutexes[j].lock();
+        lists.at(j).push_back(i);
+        if(!mutexes.empty()) mutexes[j].unlock();
     }
 }
 
-unsigned long long ListsUGraph::get_construction_time(){
-    return construction_time;
+void ListsUGraph::_sort_lists(std::vector<std::vector<size_t>> &lists, size_t id, size_t skip){
+    for (size_t j = id; j < lists.size(); j+=skip){
+        std::sort(lists.at(j).begin(),lists.at(j).end());
+    }
 }
 
-unsigned long long ListsUGraph::_count_triangles(ListsUGraph *g, size_t id, size_t skip){
+
+unsigned long long ListsUGraph::_count_triangles(std::vector<std::vector<size_t>> &lists,
+                                                std::vector<std::pair<size_t,size_t>> &edges,
+                                                size_t id, size_t skip){
 
     unsigned long long n_triangles=0;
 
-    for (size_t j = id; j < g->edges.size(); j+=skip){
+    for (size_t j = id; j < edges.size(); j+=skip){
 
-        size_t a=g->edges[j].first;
-        size_t b=g->edges[j].second;
+        size_t a=edges[j].first;
+        size_t b=edges[j].second;
 
         std::vector<size_t> c;
 
-        set_intersection(g->lists.at(a).begin(),g->lists.at(a).end(),
-                            g->lists.at(b).begin(),g->lists.at(b).end(),
+        set_intersection(lists.at(a).begin(),lists.at(a).end(),
+                            lists.at(b).begin(),lists.at(b).end(),
                             back_inserter(c));
+        
 
         n_triangles+=c.size();
     }
@@ -105,46 +108,69 @@ unsigned long long ListsUGraph::_count_triangles(ListsUGraph *g, size_t id, size
     return n_triangles;
 }
 
-void ListsUGraph::_sort(ListsUGraph *g, size_t id, size_t skip){
-    for (size_t j = id; j < g->lists.size(); j+=skip){
-        std::sort(g->lists.at(j).begin(),g->lists.at(j).end());
-    }
-}
-
-std::pair<unsigned long long,unsigned long long> ListsUGraph::count_triangles(){
+std::tuple<unsigned long long,unsigned long long,unsigned long long> ListsUGraph::count_triangles(){
+    
     auto start=std::chrono::high_resolution_clock::now();
 
-    _sort(this);
+    std::vector<std::vector<size_t>> lists(n_nodes);
+    std::vector<std::mutex> nullV;
 
-    unsigned long long n_triangles=_count_triangles(this)/3;
+    _populate_lists(lists,edges,nullV);
+    _sort_lists(lists);
 
     auto stop=std::chrono::high_resolution_clock::now();
     auto elapsed=std::chrono::duration_cast<std::chrono::milliseconds>(stop-start);
+    unsigned long long construction_time=elapsed.count(); 
 
-    return std::pair<unsigned long long,unsigned long long>(n_triangles,elapsed.count());
+
+    start=std::chrono::high_resolution_clock::now();
+
+    unsigned long long n_triangles=_count_triangles(lists,edges)/3;
+
+    stop=std::chrono::high_resolution_clock::now();
+    elapsed=std::chrono::duration_cast<std::chrono::milliseconds>(stop-start);
+    unsigned long long algo_time=elapsed.count(); 
+
+
+    return std::tuple<unsigned long long,unsigned long long,unsigned long long>(n_triangles,
+                                                                                construction_time,
+                                                                                algo_time);
 }
 
 
-std::pair<unsigned long long,unsigned long long> ListsUGraph::count_triangles_multi(size_t n_threads){
+std::tuple<unsigned long long,unsigned long long,unsigned long long> ListsUGraph::count_triangles_multi(size_t n_threads){
 
     auto start=std::chrono::high_resolution_clock::now();
 
-    //List sorting
-    std::vector<std::thread> threads(n_nodes);
+    std::vector<std::vector<size_t>> lists(n_nodes);
+
+    std::vector<std::thread> threads(n_threads);
+    std::vector<std::mutex> mutexes(n_nodes);
 
     for (size_t i = 0; i < n_threads; i++){
-        threads[i]=std::thread(_sort,this,i,n_threads);
+        threads[i]=std::thread(_populate_lists,std::ref(lists),std::ref(edges),std::ref(mutexes),i,n_threads);
     }
-
     for (size_t i = 0; i < n_threads; i++){
         threads[i].join();
     }
-    
-    //Triangle counting
+
+    for (size_t i = 0; i < n_threads; i++){
+        threads[i]=std::thread(_sort_lists,std::ref(lists),i,n_threads);
+    }
+    for (size_t i = 0; i < n_threads; i++){
+        threads[i].join();
+    }
+
+    auto stop=std::chrono::high_resolution_clock::now();
+    auto elapsed=std::chrono::duration_cast<std::chrono::milliseconds>(stop-start);
+    unsigned long long construction_time=elapsed.count(); 
+
+    start=std::chrono::high_resolution_clock::now();
+
     std::future<unsigned long long> future[n_threads]; 
 
     for (size_t i = 0; i < n_threads; i++){
-        future[i]=std::async(std::launch::async,_count_triangles,this,i,n_threads);
+        future[i]=std::async(std::launch::async,_count_triangles,std::ref(lists),std::ref(edges),i,n_threads);
     }
 
     unsigned long long n_triangles=0;
@@ -155,8 +181,12 @@ std::pair<unsigned long long,unsigned long long> ListsUGraph::count_triangles_mu
 
     n_triangles/=3;
 
-    auto stop=std::chrono::high_resolution_clock::now();
-    auto elapsed=std::chrono::duration_cast<std::chrono::milliseconds>(stop-start);
+    stop=std::chrono::high_resolution_clock::now();
+    elapsed=std::chrono::duration_cast<std::chrono::milliseconds>(stop-start);
+    unsigned long long algo_time=elapsed.count(); 
 
-    return std::pair<unsigned long long,unsigned long long>(n_triangles,elapsed.count());
+
+    return std::tuple<unsigned long long,unsigned long long,unsigned long long>(n_triangles,
+                                                                                construction_time,
+                                                                                algo_time);
 }
